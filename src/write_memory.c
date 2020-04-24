@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdio.h>
 # define BUF_SIZE 4096
 
 void	write_hex(int i, int fd_o)
@@ -67,6 +68,7 @@ int		main(int ac, char **av)
 	int		fd_o;
 	int		ret;
 	char	buf[BUF_SIZE + 1];
+	char	*mem_filename;
 
 	if (ac != 2)
 		write(1, "usage: ./write-memory [file ...]\n", 33);
@@ -77,7 +79,20 @@ int		main(int ac, char **av)
 			write(1, "Failed to open the file.\n", 25);
 		else
 		{
-			fd_o = open("memory.txt", O_RDWR | O_CREAT, 0644);
+			mem_filename = "memory.txt";
+			if (access(mem_filename, F_OK) != -1)
+			{
+				write(1, "memory.txt already exists. "
+					"Proceed with this filename? [y/n]\n", 61);
+				scanf("%s", buf);
+				if (buf[0] == 'n')
+				{
+					write(1, "New filename:\n", 14);
+					scanf("%s", mem_filename);
+				}
+					return (0);
+			}
+			fd_o = open(mem_filename, O_WRONLY | O_CREAT, 0644);
 			do
 			{
 				ret = read(fd_i, buf, BUF_SIZE);
