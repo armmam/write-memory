@@ -1,6 +1,9 @@
 #include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+# define BUF_SIZE 4096
 
-void	print_hex(int i)
+void	write_hex(int i, int fd_o)
 {
 	char	output;
 
@@ -8,24 +11,24 @@ void	print_hex(int i)
 		output = i + '0';
 	else
 		output = i - 10 + 'a';
-	write(1, &output, 1);
+	write(fd_o, &output, 1);
 }
 
-void	process_hex(unsigned char c)
+void	process_hex(unsigned char c, int fd_o)
 {
-	print_hex((int)(c / 16));
-	print_hex((int)(c % 16));
+	write_hex((int)(c / 16), fd_o);
+	write_hex((int)(c % 16), fd_o);
 }
 
-void	process_chars(unsigned char c)
+void	process_chars(unsigned char c, int fd_o)
 {
 	if (c >= 32 && c <= 126)
-		write(1, &c, 1);
+		write(fd_o, &c, 1);
 	else
-		write(1, ".", 1);
+		write(fd_o, ".", 1);
 }
 
-void	write_memory(const void *addr, size_t size)
+void	write_memory(const void *addr, size_t size, int fd_o)
 {
 	unsigned char	*ptr;
 	size_t			i;
@@ -35,34 +38,59 @@ void	write_memory(const void *addr, size_t size)
 	i = 0;
 	while (i < size)
 	{
-		process_hex(ptr[i]);
+		process_hex(ptr[i], fd_o);
 		if ((i + 1) % 2 == 0 || i == size - 1)
-			write(1, " ", 1);
+			write(fd_o, " ", 1);
 		if ((i + 1) % 16 == 0 || i == size - 1)
 		{
 			if ((i + 1) % 16 != 0)
 			{
 				j = (16 - (i + 1) % 16) * 2 + (16 - (i + 1) % 16) / 2;
 				while (j-- > 0)
-					write(1, " ", 1);
+					write(fd_o, " ", 1);
 			}
 			j = i / 16 * 16;
 			while (j <= i)
 			{
-				process_chars(ptr[j]);
+				process_chars(ptr[j], fd_o);
 				j++;
 			}
-			write(1, "\n", 1);
+			write(fd_o, "\n", 1);
 		}
 		i++;
 	}
 }
 
-int		main(void)
+int		main(int ac, char **av)
 {
-	int	tab[10] = {0, 23, 150, 255,
-	              12, 16,  21, 42};
+	int		fd_i;
+	int		fd_o;
+	int		ret;
+	char	buf[BUF_SIZE + 1];
 
-	write_memory(tab, sizeof(tab));
+	if (ac != 2)
+		write(1, "usage: ./write-memory [file ...]\n", 33);
+	else
+	{
+		fd_i = open(av[1], O_RDONLY);
+		if (fd_i < 0)
+			write(1, "Failed to open the file.\n", 25);
+		else
+		{
+			fd_o = open("memory.txt", O_RDWR | O_CREAT, 0644);
+			do
+			{
+				ret = read(fd_i, buf, BUF_SIZE);
+				if (ret < 0)
+				{
+					write(1, "Error reading the file.\n", 24);
+					exit(1);
+				}
+				write_memory(buf, ret, fd_o);
+			} while (ret);
+			close(fd_o);
+		}
+		close(fd_i);
+	}
 	return (0);
 }
