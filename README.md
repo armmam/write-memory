@@ -1,3 +1,18 @@
+## Build
+
+#### 1. Clone this repo
+
+```
+git clone https://github.com/armmam/write-memory.git
+cd write-memory
+```
+
+#### 2. Build
+
+```
+make
+```
+
 ## Usage
 
 ```
@@ -11,6 +26,7 @@ Memory representation is written to `memory.txt` in the folder where the binary 
 Each line comprises 16 bytes, first represented as hexadecimals, then as ASCII characters (as `.` if non-printable).
 
 For example, the output for `.gitignore` from this repository is
+
 ```
 2320 4f62 6a65 6374 2066 696c 6573 0a2a # Object files.*
 2e6f 0a0a 2320 4578 6563 7574 6162 6c65 .o..# Executable
