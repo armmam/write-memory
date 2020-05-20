@@ -35,7 +35,7 @@ void	write_memory(const void *addr, size_t size, int fd_o)
 	size_t			i;
 	size_t			j;
 
-	ptr = (unsigned char *)addr;
+	ptr = (unsigned char*)addr;
 	i = 0;
 	while (i < size)
 	{
@@ -99,7 +99,7 @@ int		main(int ac, char **av)
 				if (ret < 0)
 				{
 					write(1, "Error reading the file.\n", 24);
-					exit(1);
+					exit(EXIT_FAILURE);
 				}
 				write_memory(buf, ret, fd_o);
 			} while (ret);

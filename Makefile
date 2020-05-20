@@ -1,24 +1,28 @@
 NAME = write_memory
-
-OBJ = write_memory.o
-SDIR = src
-
 CC = gcc
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -MMD
+SRC_DIR = src
+OBJ_DIR = obj
+SRC_FILES = write_memory.c
+SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
+OBJ = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC))
 
 all: $(NAME)
 
-$(NAME): $(addprefix $(SDIR)/, $(OBJ))
-	@$(CC) $(FLAGS) $(addprefix $(SDIR)/, $(OBJ)) -o $(NAME)
+$(NAME): $(OBJ)
+	@$(CC) $(FLAGS) -o $(NAME) $(OBJ)
 
-%.o: %.c
-	@$(CC) $(FLAGS) -c $< -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	@$(CC) $(FLAGS) -o $@ -c $<
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
 
 clean:
-	@/bin/rm -f $(addprefix $(SDIR)/, $(OBJ))
+	@rm -rf $(OBJ_DIR)
 
 fclean: clean
-	@/bin/rm -f $(NAME)
+	@rm -f $(NAME)
 
 re: fclean all
 
